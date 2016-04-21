@@ -8,11 +8,11 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 
-public class BindingLeak {
+public class BindingNoLeak {
 
     public static void main(String[] args) {
 
-        BindingLeak bindingLeak = new BindingLeak();
+        BindingNoLeak bindingNoLeak = new BindingNoLeak();
 
         // Registry creation has a known leak (see RegistryLeak) so create it
         // under what is effectively the container class loader
@@ -23,20 +23,20 @@ public class BindingLeak {
         }
 
         // Switch TCCL
-        bindingLeak.start();
+        bindingNoLeak.start();
 
         // Register new object in RMI
-        bindingLeak.register();
+        bindingNoLeak.register();
 
         // Deregister object
-        bindingLeak.deregister();
+        bindingNoLeak.deregister();
 
         // Restore TCCL
-        bindingLeak.stop();
+        bindingNoLeak.stop();
 
         // Check for leaks
         int count = 0;
-        while (count < 10 && bindingLeak.leakCheck()) {
+        while (count < 10 && bindingNoLeak.leakCheck()) {
             // Trigger GC
             System.gc();
             try {
@@ -48,7 +48,7 @@ public class BindingLeak {
         }
         System.out.println("There were " + count + " calls to GC");
 
-        if (bindingLeak.leakCheck()) {
+        if (bindingNoLeak.leakCheck()) {
             System.out.println("Leak");
         } else {
             System.out.println("No leak");
