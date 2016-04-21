@@ -24,11 +24,25 @@ public class RegistryLeak {
         // Restore TCCL
         registryLeak.stop();
 
-        // Trigger GC
-        System.gc();
+        // Check for leaks
+        int count = 0;
+        while (count < 10 && registryLeak.leakCheck()) {
+            // Trigger GC
+            System.gc();
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            count++;
+        }
+        System.out.println("There were " + count + " calls to GC");
 
-        // Check for leak
-        registryLeak.leakCheck();
+        if (registryLeak.leakCheck()) {
+            System.out.println("Leak");
+        } else {
+            System.out.println("No leak");
+        }
     }
 
     private static final ClassLoader ORIGINAL_CLASS_LOADER =
@@ -64,11 +78,7 @@ public class RegistryLeak {
     }
 
 
-    private void leakCheck() {
-        if (moduleClassLoaderRef.get() == null) {
-            System.out.println("No leak");
-        } else {
-            System.out.println("Leak");
-        }
+    private boolean leakCheck() {
+        return moduleClassLoaderRef.get() != null;
     }
 }
