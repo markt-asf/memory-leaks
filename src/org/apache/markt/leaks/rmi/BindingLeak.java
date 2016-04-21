@@ -22,28 +22,37 @@ public class BindingLeak {
             e.printStackTrace();
         }
 
-        // Use this to demonstrate that the problem lies with bind/unbind
-        // When true, there is a memory leak
-        // When false, there is no memory leak
-        boolean register = true;
-
         // Switch TCCL
         bindingLeak.start();
 
         // Register new object in RMI
-        bindingLeak.register(register);
+        bindingLeak.register();
 
         // Deregister object
-        bindingLeak.deregister(register);
+        bindingLeak.deregister();
 
         // Restore TCCL
         bindingLeak.stop();
 
-        // Trigger GC
-        System.gc();
+        // Check for leaks
+        int count = 0;
+        while (count < 10 && bindingLeak.leakCheck()) {
+            // Trigger GC
+            System.gc();
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            count++;
+        }
+        System.out.println("There were " + count + " calls to GC");
 
-        // Check for leak
-        bindingLeak.leakCheck();
+        if (bindingLeak.leakCheck()) {
+            System.out.println("Leak");
+        } else {
+            System.out.println("No leak");
+        }
     }
 
 
@@ -62,24 +71,20 @@ public class BindingLeak {
     }
 
 
-    private void register(boolean register) {
+    private void register() {
         remoteObject = new ChatImpl();
         try {
             Chat stub = (Chat) UnicastRemoteObject.exportObject(remoteObject, 10180);
-            if (register) {
-                LocateRegistry.getRegistry().bind(NAME, stub);
-            }
+            LocateRegistry.getRegistry().bind(NAME, stub);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
 
-    private void deregister(boolean register) {
+    private void deregister() {
         try {
-            if (register) {
-                LocateRegistry.getRegistry().unbind(NAME);
-            }
+            LocateRegistry.getRegistry().unbind(NAME);
             UnicastRemoteObject.unexportObject(remoteObject, true);
         } catch (Exception e) {
             e.printStackTrace();
@@ -93,11 +98,7 @@ public class BindingLeak {
     }
 
 
-    private void leakCheck() {
-        if (moduleClassLoaderRef.get() == null) {
-            System.out.println("No leak");
-        } else {
-            System.out.println("Leak");
-        }
+    private boolean leakCheck() {
+        return moduleClassLoaderRef.get() != null;
     }
 }
