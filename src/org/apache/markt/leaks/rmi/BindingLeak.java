@@ -22,8 +22,10 @@ public class BindingLeak {
             e.printStackTrace();
         }
 
-        // Setting this to true triggers a leak
-        boolean register = false;
+        // Use this to demonstrate that the problem lies with bind/unbind
+        // When true, there is a memory leak
+        // When false, there is no memory leak
+        boolean register = true;
 
         // Switch TCCL
         bindingLeak.start();
