@@ -15,10 +15,10 @@ public class RegistryLeak {
         // Switch TCCL
         registryLeak.start();
 
-        // Register new object in RMI
+        // Create RMI registry
         registryLeak.register();
 
-        // Deregister object
+        // Clean-up registry
         registryLeak.deregister();
 
         // Restore TCCL
