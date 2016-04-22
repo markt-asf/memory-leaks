@@ -8,11 +8,20 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 
-public class BindingLeak {
+/**
+ * Demonstrates that a web application that creates an RMI registry can prevent
+ * related memory leaks by ensuring that the registry is unexported. It is not
+ * necessary to unbind or unexport objects in the registry. Unexported just the
+ * registry is sufficient.
+ *
+ * Note that there is an outstanding TODO for {@link RegistryLeak} to determine
+ * how to identify a web application created RMI registry.
+ */
+public class BindingLeakApplicationRegistry {
 
     public static void main(String[] args) {
 
-        BindingLeak bindingLeak = new BindingLeak();
+        BindingLeakApplicationRegistry bindingLeak = new BindingLeakApplicationRegistry();
 
         // Switch TCCL
         bindingLeak.start();
@@ -78,11 +87,9 @@ public class BindingLeak {
 
 
     private void deregister() {
-        // TODO: Figure out how to make this work without the reference to
-        //       remote object.
         try {
-            // Note the following two calls are not required to prevent a
-            // memory leak
+            // Note: The follow two calls can be skipped but that then requires
+            //       an extra GC.
             registry.unbind(NAME);
             UnicastRemoteObject.unexportObject(remoteObject, true);
             // Correct way for web application to close down RMI registry
