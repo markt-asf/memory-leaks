@@ -83,6 +83,8 @@ public class BindingNoLeak {
 
 
     private void deregister() {
+        // TODO: Figure out how to make this work without the reference to
+        //       remote object.
         try {
             LocateRegistry.getRegistry().unbind(NAME);
             UnicastRemoteObject.unexportObject(remoteObject, true);
