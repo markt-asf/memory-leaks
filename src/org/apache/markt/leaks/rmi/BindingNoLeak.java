@@ -74,7 +74,7 @@ public class BindingNoLeak {
     private void register() {
         remoteObject = new ChatImpl();
         try {
-            Chat stub = (Chat) UnicastRemoteObject.exportObject(remoteObject, 10180);
+            Chat stub = (Chat) UnicastRemoteObject.exportObject(remoteObject, 0);
             LocateRegistry.getRegistry().bind(NAME, stub);
         } catch (Exception e) {
             e.printStackTrace();
