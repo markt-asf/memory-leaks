@@ -62,6 +62,7 @@ public class BindingLeak {
 
     private WeakReference<ClassLoader> moduleClassLoaderRef;
     private Remote remoteObject;
+    private Registry registry;
 
     private void start() {
         ClassLoader moduleClassLoader = new URLClassLoader(new URL[] {}, ORIGINAL_CLASS_LOADER);
@@ -72,10 +73,11 @@ public class BindingLeak {
 
 
     private void register() {
-        remoteObject = new ChatImpl();
         try {
+            remoteObject = new ChatImpl();
+            registry = LocateRegistry.getRegistry();
             Chat stub = (Chat) UnicastRemoteObject.exportObject(remoteObject, 0);
-            LocateRegistry.getRegistry().bind(NAME, stub);
+            registry.bind(NAME, stub);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -86,12 +88,13 @@ public class BindingLeak {
         // TODO: Figure out how to make this work without the reference to
         //       remote object.
         try {
-            LocateRegistry.getRegistry().unbind(NAME);
+            registry.unbind(NAME);
             UnicastRemoteObject.unexportObject(remoteObject, true);
         } catch (Exception e) {
             e.printStackTrace();
         }
         remoteObject = null;
+        registry = null;
     }
 
 
