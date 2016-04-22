@@ -1,12 +1,11 @@
 package org.apache.markt.leaks.rmi;
 
-import java.lang.ref.WeakReference;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.rmi.Remote;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+
+import org.apache.markt.leaks.LeakBase;
 
 /**
  * Demonstrates that a web application that creates an RMI registry can prevent
@@ -17,63 +16,22 @@ import java.rmi.server.UnicastRemoteObject;
  * Note that there is an outstanding TODO for {@link RegistryLeak} to determine
  * how to identify a web application created RMI registry.
  */
-public class BindingLeakApplicationRegistry {
+public class BindingLeakApplicationRegistry extends LeakBase {
 
     public static void main(String[] args) {
-
         BindingLeakApplicationRegistry bindingLeak = new BindingLeakApplicationRegistry();
-
-        // Switch TCCL
-        bindingLeak.start();
-
-        // Register new object in RMI
-        bindingLeak.register();
-
-        // Deregister object
-        bindingLeak.deregister();
-
-        // Restore TCCL
-        bindingLeak.stop();
-
-        // Check for leaks
-        int count = 0;
-        while (count < 10 && bindingLeak.leakCheck()) {
-            // Trigger GC
-            System.gc();
-            try {
-                Thread.sleep(200);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            count++;
-        }
-        System.out.println("There were " + count + " calls to GC");
-
-        if (bindingLeak.leakCheck()) {
-            System.out.println("Leak");
-        } else {
-            System.out.println("No leak");
-        }
+        bindingLeak.doLeakTest();
     }
 
 
-    private static final ClassLoader ORIGINAL_CLASS_LOADER =
-            Thread.currentThread().getContextClassLoader();
     private static final String NAME = "Chat";
 
-    private WeakReference<ClassLoader> moduleClassLoaderRef;
     private Remote remoteObject;
     private Registry registry;
 
-    private void start() {
-        ClassLoader moduleClassLoader = new URLClassLoader(new URL[] {}, ORIGINAL_CLASS_LOADER);
 
-        Thread.currentThread().setContextClassLoader(moduleClassLoader);
-        moduleClassLoaderRef = new WeakReference<>(moduleClassLoader);
-    }
-
-
-    private void register() {
+    @Override
+    protected void createLeakingObjects() {
         try {
             // Equivalent to a web application creating an RMI registry.
             registry = LocateRegistry.createRegistry(Registry.REGISTRY_PORT);
@@ -86,7 +44,8 @@ public class BindingLeakApplicationRegistry {
     }
 
 
-    private void deregister() {
+    @Override
+    protected void cleanUpLeakingObjects() {
         try {
             // Note: The follow two calls can be skipped but that then requires
             //       an extra GC.
@@ -99,15 +58,5 @@ public class BindingLeakApplicationRegistry {
         }
         remoteObject = null;
         registry = null;
-    }
-
-
-    private void stop() {
-        Thread.currentThread().setContextClassLoader(ORIGINAL_CLASS_LOADER);
-    }
-
-
-    private boolean leakCheck() {
-        return moduleClassLoaderRef.get() != null;
     }
 }
