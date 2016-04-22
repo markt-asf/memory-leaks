@@ -5,6 +5,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
 
 public class RegistryLeak {
 
@@ -49,6 +50,7 @@ public class RegistryLeak {
             Thread.currentThread().getContextClassLoader();
 
     private WeakReference<ClassLoader> moduleClassLoaderRef;
+    private Registry registry;
 
 
     private void start() {
@@ -61,7 +63,7 @@ public class RegistryLeak {
 
     private void register() {
         try {
-            LocateRegistry.createRegistry(Registry.REGISTRY_PORT);
+            registry = LocateRegistry.createRegistry(Registry.REGISTRY_PORT);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -69,7 +71,14 @@ public class RegistryLeak {
 
 
     private void deregister() {
-        // NO-OP. NO API available.
+        // TODO: How to make this work without the reference to the registry?
+        //       Need a registry list
+        //       Need to be able to determine the TCCL used for each registry
+        try {
+            UnicastRemoteObject.unexportObject(registry, false);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 
