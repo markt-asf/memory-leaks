@@ -10,7 +10,7 @@ import org.apache.markt.leaks.LeakBase;
 /**
  * Demonstrates that a web application that creates an RMI registry can prevent
  * related memory leaks by ensuring that the registry is unexported. It is not
- * necessary to unbind or unexport objects in the registry. Unexported just the
+ * necessary to unbind or unexport objects in the registry. Unexporting just the
  * registry is sufficient.
  *
  * Note that there is an outstanding TODO for {@link RegistryLeak} to determine
