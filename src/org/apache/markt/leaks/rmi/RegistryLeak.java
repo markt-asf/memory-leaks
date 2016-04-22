@@ -7,6 +7,18 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 
+/**
+ * Demonstrates the correct way for a web application created RMI registry to be
+ * closed down, thereby avoiding a memory leak.
+ * <p>
+ * TODO: Figure out how to identify a web application created registry so it
+ *       can be shut down by the container if the web application fails to do
+ *       so. We need:
+ *       <ul>
+ *       <li>The current registry list</li>
+ *       <li>A way to determine TCCL for each registry</li>
+ *       </ul>
+ */
 public class RegistryLeak {
 
     public static void main(String[] args) {
@@ -71,9 +83,6 @@ public class RegistryLeak {
 
 
     private void deregister() {
-        // TODO: How to make this work without the reference to the registry?
-        //       Need a registry list
-        //       Need to be able to determine the TCCL used for each registry
         try {
             UnicastRemoteObject.unexportObject(registry, false);
         } catch (Exception e) {
