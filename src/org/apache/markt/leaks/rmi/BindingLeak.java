@@ -14,14 +14,6 @@ public class BindingLeak {
 
         BindingLeak bindingLeak = new BindingLeak();
 
-        // Registry creation has a known leak (see RegistryLeak) so create it
-        // under what is effectively the container class loader
-        try {
-            LocateRegistry.createRegistry(Registry.REGISTRY_PORT);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
         // Switch TCCL
         bindingLeak.start();
 
@@ -74,8 +66,9 @@ public class BindingLeak {
 
     private void register() {
         try {
+            // Equivalent to a web application creating an RMI registry.
+            registry = LocateRegistry.createRegistry(Registry.REGISTRY_PORT);
             remoteObject = new ChatImpl();
-            registry = LocateRegistry.getRegistry();
             Chat stub = (Chat) UnicastRemoteObject.exportObject(remoteObject, 0);
             registry.bind(NAME, stub);
         } catch (Exception e) {
@@ -88,8 +81,12 @@ public class BindingLeak {
         // TODO: Figure out how to make this work without the reference to
         //       remote object.
         try {
+            // Note the following two calls are not required to prevent a
+            // memory leak
             registry.unbind(NAME);
             UnicastRemoteObject.unexportObject(remoteObject, true);
+            // Correct way for web application to close down RMI registry
+            UnicastRemoteObject.unexportObject(registry, true);
         } catch (Exception e) {
             e.printStackTrace();
         }
