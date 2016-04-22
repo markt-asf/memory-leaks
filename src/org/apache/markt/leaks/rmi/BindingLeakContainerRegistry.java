@@ -7,6 +7,16 @@ import java.rmi.server.UnicastRemoteObject;
 
 import org.apache.markt.leaks.LeakBase;
 
+/**
+ * Demonstrates that a web application that uses a container provided RMI
+ * registry will not trigger a memory leak but will require additional GC calls
+ * to clean up.
+ *
+ * TODO: How to force a clean-up when the original remote object is not
+ *       available?
+ *       How to clean up the reference that currently requires the additional
+ *       GC?
+ */
 public class BindingLeakContainerRegistry extends LeakBase {
 
     public static void main(String[] args) {
@@ -39,8 +49,6 @@ public class BindingLeakContainerRegistry extends LeakBase {
 
     @Override
     protected void cleanUpLeakingObjects() {
-        // TODO: Figure out how to make this work without the reference to
-        //       remote object.
         try {
             LocateRegistry.getRegistry().unbind(NAME);
             // Note the following call is not required to prevent a memory leak
