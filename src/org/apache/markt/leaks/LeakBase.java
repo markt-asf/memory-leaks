@@ -61,7 +61,7 @@ public abstract class LeakBase {
         ClassLoader moduleClassLoader = new URLClassLoader(new URL[] {}, ORIGINAL_CLASS_LOADER);
 
         Thread.currentThread().setContextClassLoader(moduleClassLoader);
-        moduleClassLoaderRef = new WeakReference<>(moduleClassLoader);
+        moduleClassLoaderRef = new WeakReference<ClassLoader>(moduleClassLoader);
     }
 
 
