@@ -6,9 +6,8 @@ import org.apache.markt.leaks.LeakBase;
  * Java 5
  *  - update 22 - leaks
  * Java 6
- *  - update =<00 - leaks
- *    ??? when was this fixed ???
- *  - update >=45 - no leak
+ *  - update =<20 - leaks
+ *  - update >=21 - no leak
  * Java 7 - no leak
  * Java 8 - no leak
  */
