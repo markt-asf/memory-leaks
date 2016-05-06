@@ -1,4 +1,4 @@
-package org.apache.markt.leaks.gc;
+package org.apache.markt.leaks.rmi;
 
 import java.lang.reflect.Method;
 
