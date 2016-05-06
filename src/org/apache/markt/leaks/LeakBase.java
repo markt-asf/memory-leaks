@@ -57,6 +57,11 @@ public abstract class LeakBase {
     }
 
 
+    protected ClassLoader getModuleClassLoader() {
+        return moduleClassLoaderRef.get();
+    }
+
+
     private void start() {
         ClassLoader moduleClassLoader = new URLClassLoader(new URL[] {}, ORIGINAL_CLASS_LOADER);
 
