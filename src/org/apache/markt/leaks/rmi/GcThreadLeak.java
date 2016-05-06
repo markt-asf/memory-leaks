@@ -31,6 +31,7 @@ public class GcThreadLeak extends LeakBase {
                     "requestLatency",
                     new Class[] {long.class});
             method.invoke(null, Long.valueOf(Long.MAX_VALUE - 1));
+            Thread.currentThread().setContextClassLoader(GcThreadLeak.class.getClassLoader());
         } catch (Exception e) {
             e.printStackTrace();
         }
