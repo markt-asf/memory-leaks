@@ -30,7 +30,7 @@ public abstract class LeakBase {
 
         // Check for leaks
         int count = 0;
-        while (count < 10 && leakCheck()) {
+        while (count < 3 && leakCheck()) {
             // Trigger GC
             System.gc();
             try {
