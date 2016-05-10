@@ -1,21 +1,29 @@
 package org.apache.markt.leaks.xml;
 
-import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
 import org.apache.markt.leaks.LeakBase;
 import org.w3c.dom.Document;
+import org.w3c.dom.ls.DOMImplementationLS;
 
 /**
+ * The new document leak is fixed in Java 7 onwards:
+ * http://bugs.java.com/bugdatabase/view_bug.do?bug_id=6916498
+ *
+ * The Serializer and Normalizer leaks are very odd. Run the code in a Servlet
+ * and a memory leak occurs. Run it in this stand-along test harness and no leak
+ * occurs. Further, the GC roots for these leaks are not visible to the
+ * profiler.
+ * https://bz.apache.org/bugzilla/show_bug.cgi?id=58486
+ * https://bugs.openjdk.java.net/browse/JDK-8146961
+ *
  * Java 5
- *   - TBD
+ *   - leaks
  * Java 6
- *   - TBD
+ *   - leaks
  * Java 7
- *   - TBD
+ *   - leaks
  * Java 8
- *   - TBD
+ *   - leaks
  */
 public class NewDocumentLeak extends LeakBase {
 
@@ -27,12 +35,17 @@ public class NewDocumentLeak extends LeakBase {
 
     @Override
     protected void createLeakingObjects() {
-        // Nov/Dec 2009. 6.0.x - r892620 6.0.21
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         try {
-            DocumentBuilder documentBuilder = factory.newDocumentBuilder();
-            Document document = documentBuilder.newDocument();
-        } catch (ParserConfigurationException e) {
+            Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+            // Serializer
+            document.createElement("test");
+            DOMImplementationLS implementation = (DOMImplementationLS)document.getImplementation();
+            implementation.createLSSerializer().writeToString(document);
+            // or
+            // Normalizer
+            // document.normalizeDocument();
+
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
