@@ -40,7 +40,7 @@ public class NewDocumentLeak extends LeakBase {
             // Serializer
             document.createElement("test");
             DOMImplementationLS implementation = (DOMImplementationLS)document.getImplementation();
-            implementation.createLSSerializer().writeToString(document);
+            implementation.createLSSerializer();
             // or
             // Normalizer
             // document.normalizeDocument();
