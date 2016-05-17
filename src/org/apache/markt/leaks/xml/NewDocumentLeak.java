@@ -9,12 +9,23 @@ import org.w3c.dom.ls.DOMImplementationLS;
  * The new document leak is fixed in Java 7 onwards:
  * http://bugs.java.com/bugdatabase/view_bug.do?bug_id=6916498
  *
- * The Serializer and Normalizer leaks are very odd. Run the code in a Servlet
- * and a memory leak occurs. Run it in this stand-along test harness and no leak
- * occurs. Further, the GC roots for these leaks are not visible to the
- * profiler.
+ * The other two leaks are not yet fixed:
  * https://bz.apache.org/bugzilla/show_bug.cgi?id=58486
  * https://bugs.openjdk.java.net/browse/JDK-8146961
+ *
+ * Note: Some profilers (YourKit using YourKit snapshot format) and Eclipse MAT
+ *       are unable to identify the root cause of this memory leak. This is
+ *       because they use the JVMTI API to enumerate the objects on the heap
+ *       and, thanks to https://bugs.openjdk.java.net/browse/JDK-4496456 the
+ *       backtrace field that holds the problematic reference is explicitly
+ *       excluded. If the HPROF memory snapshot format is used with YourKit it
+ *       is possible to trace the references to the root of the memory leak.
+ *
+ * TODO: The code below requires modification to demonstrate the leak. This is
+ *       because the leak will only appear if a class loaded by the module
+ *       class loader is in the stack trace of the RuntimeException when it is
+ *       created (as happens when similar code is executed from a JSP or
+ *       Servlet). Currently, this is not the case so the leak does not appear.
  *
  * Java 5
  *   - leaks
