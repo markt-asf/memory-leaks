@@ -2,7 +2,6 @@ package org.apache.markt.leaks;
 
 import java.lang.ref.WeakReference;
 import java.net.URL;
-import java.net.URLClassLoader;
 
 /**
  * Base class for memory leak tests.
@@ -63,7 +62,7 @@ public abstract class LeakBase {
 
 
     private void start() {
-        ClassLoader moduleClassLoader = new URLClassLoader(new URL[] {}, ORIGINAL_CLASS_LOADER);
+        ClassLoader moduleClassLoader = new RelaxedClassLoader(new URL[] {}, ORIGINAL_CLASS_LOADER);
 
         Thread.currentThread().setContextClassLoader(moduleClassLoader);
         moduleClassLoaderRef = new WeakReference<ClassLoader>(moduleClassLoader);
