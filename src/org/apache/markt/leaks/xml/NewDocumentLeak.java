@@ -69,7 +69,7 @@ public class NewDocumentLeak extends LeakBase {
 
             Class<?> lpClass = cl.defineClass0("org.apache.markt.leaks.xml.StaticExceptionLeak",
                     classBytes, 0, offset, this.getClass().getProtectionDomain());
-            Object obj = lpClass.newInstance();
+            Object obj = lpClass.getConstructor().newInstance();
 
             Method m = obj.getClass().getMethod("leak");
             m.invoke(obj);
