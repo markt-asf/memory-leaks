@@ -13,6 +13,8 @@ import org.apache.markt.leaks.LeakBase;
  *  - leaks
  * Java 9
  *  - Fixed
+ *
+ * http://bugs.java.com/bugdatabase/view_bug.do?bug_id=JDK-8156824
  */
 public class PoolManagerLeak extends LeakBase {
 

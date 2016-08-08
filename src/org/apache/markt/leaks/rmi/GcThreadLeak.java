@@ -15,6 +15,8 @@ import org.apache.markt.leaks.LeakBase;
  *       RMIConnectorServer instance. However, that creates a fair amount of
  *       noise that makes it difficult to isolate this issue. Therefore this
  *       test uses reflection to trigger the specific problem.
+ *
+ * http://bugs.java.com/bugdatabase/view_bug.do?bug_id=JDK-8157570
  */
 public class GcThreadLeak extends LeakBase {
 
