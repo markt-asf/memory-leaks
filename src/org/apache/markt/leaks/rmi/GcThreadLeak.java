@@ -9,6 +9,7 @@ import org.apache.markt.leaks.LeakBase;
  * Java 6 - leaks
  * Java 7 - leaks
  * Java 8 - leaks
+ * Java 9 - Fixed
  *
  * Note: One way to trigger this via public APIs is by creating and starting a
  *       RMIConnectorServer instance. However, that creates a fair amount of
@@ -26,10 +27,19 @@ public class GcThreadLeak extends LeakBase {
     @Override
     protected void createLeakingObjects() {
         try {
-            Class<?> clazz = Class.forName("sun.misc.GC");
+            Class<?> clazz;
+            try {
+                clazz = Class.forName("sun.misc.GC");
+            } catch (ClassNotFoundException cnfe) {
+                // Java 9? Try the new name
+                // Note: The JVM needs to be started with
+                //       -XaddExports:java.rmi/sun.rmi.transport=ALL-UNNAMED
+                clazz = Class.forName("sun.rmi.transport.GC");
+            }
             Method method = clazz.getDeclaredMethod(
                     "requestLatency",
                     new Class[] {long.class});
+            method.setAccessible(true);
             method.invoke(null, Long.valueOf(Long.MAX_VALUE - 1));
             Thread.currentThread().setContextClassLoader(GcThreadLeak.class.getClassLoader());
         } catch (Exception e) {
@@ -40,6 +50,9 @@ public class GcThreadLeak extends LeakBase {
 
     @Override
     protected void cleanUpLeakingObjects() {
+        // Comment out the clean-up to enable simple testing for the fix in new
+        // releases.
+        /*
         Thread[] threads = getThreads();
 
         for (Thread thread : threads) {
@@ -50,6 +63,7 @@ public class GcThreadLeak extends LeakBase {
                 }
             }
         }
+        */
     }
 
 
