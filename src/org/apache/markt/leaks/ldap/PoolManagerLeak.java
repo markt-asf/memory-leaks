@@ -11,6 +11,8 @@ import org.apache.markt.leaks.LeakBase;
  *  - leaks
  * Java 8
  *  - leaks
+ * Java 9
+ *  - Fixed
  */
 public class PoolManagerLeak extends LeakBase {
 
