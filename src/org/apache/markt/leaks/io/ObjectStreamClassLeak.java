@@ -4,6 +4,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectOutputStream;
+import java.lang.ref.Reference;
+import java.lang.reflect.Field;
+import java.util.Iterator;
+import java.util.Map;
+
 import org.apache.markt.leaks.LeakBase;
 import org.apache.markt.leaks.RelaxedClassLoader;
 
@@ -76,6 +81,38 @@ public class ObjectStreamClassLeak extends LeakBase {
 
     @Override
     protected void cleanUpLeakingObjects() {
-        // None
+        try {
+            Class<?> clazz = Class.forName("java.io.ObjectStreamClass$Caches");
+            clearCache(clazz, "localDescs");
+            clearCache(clazz, "reflectors");
+        } catch (ReflectiveOperationException | SecurityException | ClassCastException e) {
+            // Clean-up failed
+            e.printStackTrace();
+        }
+    }
+
+
+    private void clearCache(Class<?> target, String mapName)
+            throws ReflectiveOperationException, SecurityException, ClassCastException {
+        Field f = target.getDeclaredField(mapName);
+        f.setAccessible(true);
+        Map<?,?> map = (Map<?,?>) f.get(null);
+        Iterator<?> keys = map.keySet().iterator();
+        while (keys.hasNext()) {
+            Object key = keys.next();
+            if (key instanceof Reference) {
+                Object clazz = ((Reference<?>) key).get();
+                if (clazz instanceof Class) {
+                    ClassLoader cl = ((Class<?>) clazz).getClassLoader();
+                    while (cl != null) {
+                        if (cl == getModuleClassLoader()) {
+                            keys.remove();
+                            break;
+                        }
+                        cl = cl.getParent();
+                    }
+                }
+            }
+        }
     }
 }
