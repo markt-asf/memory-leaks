@@ -8,8 +8,9 @@ import org.apache.markt.leaks.LeakBase;
 /**
  * Java 5 - ForkJoin not supported
  * Java 6 - ForkJoin not supported
- * Java 7 - no leak
- * Java 8 - no leak
+ * Java 7 - leaks
+ * Java 8 - leaks
+ * Java 9 - no leak
  */
 public class ForkJoinThreadLeak extends LeakBase {
 
